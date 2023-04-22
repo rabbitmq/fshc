@@ -1,7 +1,7 @@
 use std::io;
 
 use clap::Parser;
-use procfs::{process::{Process, FDTarget}, ProcError};
+use procfs::{process::{Process, FDTarget}};
 use serde::Serialize;
 use serde_json::json;
 
