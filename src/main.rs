@@ -1,9 +1,12 @@
-use std::{io, fmt};
+mod outcome;
 
+use std::fmt;
 use clap::Parser;
 use procfs::{process::{Process, FDTarget}};
 use serde::Serialize;
 use sysexits::ExitCode;
+
+use crate::outcome::*;
 
 const PID_LIMIT: u32 = 99_999;
 
@@ -12,21 +15,6 @@ struct CliArgs {
     #[arg(short, long)]
     pid: u32
 }
-
-#[derive(Debug, Serialize)]
-struct ProcStats {
-    pid: i32,
-    socket_descriptors: u32,
-    file_descriptors: u32
-}
-
-#[derive(Debug, Serialize)]
-struct Failure<'a> {
-    message: &'a str,
-    details: &'a str
-}
-
-type FshcResult = Result<ProcStats, Box<dyn std::error::Error>>;
 
 fn main() {
     let args = CliArgs::parse();
@@ -73,7 +61,7 @@ fn terminate(outcome: FshcResult, args: &CliArgs) {
                 message: &format!("Failed to obtain file and socket descriptors of process {}", args.pid),
                 details: &err.to_string()
             };
-            exit(&failure, ExitCode::DataErr);
+            exit(&failure, err.exit_code());
         }
     }
 }
@@ -91,18 +79,15 @@ fn exit<T: Serialize + fmt::Debug>(data: T, code: ExitCode) {
     }
 }
 
-fn validate_pid(args: &CliArgs) -> Result<i32, Box<dyn std::error::Error>> {
+fn validate_pid(args: &CliArgs) -> Result<i32, FshcError> {
     if args.pid > PID_LIMIT {
-        eprintln!("pids greater than 99999 are not supported, provided: {}", args.pid);
-        let err = Box::new(io::Error::new(io::ErrorKind::InvalidInput, "pids greater than 99999 are not supported"));
-        return Err(err);
+        return Err(FshcError::PidOutOfRange);
     }
 
     match TryInto::<i32>::try_into(args.pid) {
         Ok(val) => Ok(val),
         Err(_) => {
-            let err = Box::new(io::Error::new(io::ErrorKind::InvalidInput, "pids greater than 99999 are not supported"));
-            Err(err)
+            Err(FshcError::InvalidInput)
         }
     }
 }
