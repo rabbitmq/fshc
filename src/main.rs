@@ -1,9 +1,9 @@
-use std::io;
+use std::{io, fmt};
 
 use clap::Parser;
 use procfs::{process::{Process, FDTarget}};
 use serde::Serialize;
-use serde_json::json;
+use sysexits::ExitCode;
 
 const PID_LIMIT: u32 = 99_999;
 
@@ -20,7 +20,7 @@ struct ProcStats {
     file_descriptors: u32
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 struct Failure<'a> {
     message: &'a str,
     details: &'a str
@@ -32,19 +32,7 @@ fn main() {
     let args = CliArgs::parse();
     let res = run(&args);
     
-    match res {
-        Ok(stats) => {
-            println!("{}", json!(stats));
-        },
-        Err(err) => {
-            let failure = Failure {
-                message: &format!("Failed to obtain file and socket descriptors of process {}", args.pid),
-                details: &err.to_string()
-            };
-            eprintln!("{}", json!(failure));
-            std::process::exit(sysexits::ExitCode::OsErr as i32);
-        }
-    }
+    terminate(res, &args)
 }
 
 fn run(args: &CliArgs) -> FshcResult {
@@ -73,6 +61,34 @@ fn run(args: &CliArgs) -> FshcResult {
     }
     
     Ok(stats)
+}
+
+fn terminate(outcome: FshcResult, args: &CliArgs) {
+    match outcome {
+        Ok(stats) => {
+            exit(&stats, ExitCode::Ok);
+        },
+        Err(err) => {
+            let failure = Failure {
+                message: &format!("Failed to obtain file and socket descriptors of process {}", args.pid),
+                details: &err.to_string()
+            };
+            exit(&failure, ExitCode::DataErr);
+        }
+    }
+}
+
+fn exit<T: Serialize + fmt::Debug>(data: T, code: ExitCode) {
+    match code {
+        ExitCode::Ok => {
+            println!("{}", serde_json::to_string(&data).expect(&format!("could not serialize {:?}", data)));
+            std::process::exit(code as i32);
+        },
+        _ => {
+            eprintln!("{}", serde_json::to_string(&data).expect(&format!("could not serialize {:?}", data)));
+            std::process::exit(code as i32);
+        }
+    }
 }
 
 fn validate_pid(args: &CliArgs) -> Result<i32, Box<dyn std::error::Error>> {
