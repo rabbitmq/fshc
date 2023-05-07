@@ -1,4 +1,5 @@
 use crate::outcome::*;
+#[cfg(target_os = "macos")]
 use libproc::libproc::file_info::ProcFDType;
 #[cfg(target_os = "macos")]
 use libproc::libproc::{
