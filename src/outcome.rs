@@ -30,6 +30,7 @@ pub enum FshcError {
     IoError,
     #[error("failed to fetch file descriptor details for the target process")]
     Other,
+    #[cfg(target_os = "macos")]
     #[error("{0}")]
     Errno(String),
 }
@@ -48,6 +49,7 @@ impl ExitCodeProvider for FshcError {
             FshcError::IoError => ExitCode::IoErr,
             FshcError::InvalidInput => ExitCode::DataErr,
             FshcError::Other => ExitCode::OsErr,
+            #[cfg(target_os = "macos")]
             FshcError::Errno(_) => ExitCode::OsErr,
         }
     }
