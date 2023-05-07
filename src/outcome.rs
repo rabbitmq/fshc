@@ -1,7 +1,7 @@
-use std::io;
-
+#[cfg(target_os = "linux")]
 use procfs::ProcError;
 use serde::Serialize;
+use std::io;
 use sysexits::ExitCode;
 use thiserror::Error;
 
@@ -30,6 +30,9 @@ pub enum FshcError {
     IoError,
     #[error("failed to fetch file descriptor details for the target process")]
     Other,
+    #[cfg(target_os = "macos")]
+    #[error("{0}")]
+    Errno(String),
 }
 
 pub trait ExitCodeProvider {
@@ -46,6 +49,8 @@ impl ExitCodeProvider for FshcError {
             FshcError::IoError => ExitCode::IoErr,
             FshcError::InvalidInput => ExitCode::DataErr,
             FshcError::Other => ExitCode::OsErr,
+            #[cfg(target_os = "macos")]
+            FshcError::Errno(_) => ExitCode::OsErr,
         }
     }
 }
@@ -62,6 +67,7 @@ impl ExitCodeProvider for io::Error {
     }
 }
 
+#[cfg(target_os = "linux")]
 impl ExitCodeProvider for ProcError {
     fn exit_code(&self) -> ExitCode {
         match self {
@@ -87,6 +93,14 @@ impl From<io::Error> for FshcError {
     }
 }
 
+#[cfg(target_os = "macos")]
+impl From<String> for FshcError {
+    fn from(value: String) -> Self {
+        FshcError::Errno(value)
+    }
+}
+
+#[cfg(target_os = "linux")]
 impl From<procfs::ProcError> for FshcError {
     fn from(value: procfs::ProcError) -> Self {
         match value {

@@ -1,11 +1,12 @@
+mod fds;
 mod outcome;
 
 use clap::Parser;
-use procfs::process::{FDTarget, Process};
 use serde::Serialize;
 use std::fmt;
 use sysexits::ExitCode;
 
+use crate::fds::*;
 use crate::outcome::*;
 
 const PID_LIMIT: u32 = 99_999;
@@ -25,26 +26,7 @@ fn main() {
 
 fn run(args: &CliArgs) -> FshcResult {
     let pid = validate_pid(args)?;
-    let proc = Process::new(pid)?;
-    let all_fds = proc.fd()?;
-
-    let mut stats = ProcStats {
-        pid: pid,
-        socket_descriptors: 0,
-        file_descriptors: 0,
-    };
-    let fds = all_fds.flatten().filter(|fd_info| match fd_info.target {
-        FDTarget::Path(_) => true,
-        FDTarget::Socket(_) => true,
-        _ => false,
-    });
-    for fd in fds {
-        match fd.target {
-            FDTarget::Path(_) => stats.file_descriptors += 1,
-            FDTarget::Socket(_) => stats.socket_descriptors += 1,
-            _ => (),
-        }
-    }
+    let stats = FdList::list(pid)?;
 
     Ok(stats)
 }
