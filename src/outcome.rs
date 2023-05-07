@@ -9,13 +9,13 @@ use thiserror::Error;
 pub struct ProcStats {
     pub pid: i32,
     pub socket_descriptors: u32,
-    pub file_descriptors: u32
+    pub file_descriptors: u32,
 }
 
 #[derive(Debug, Serialize)]
 pub struct Failure<'a> {
     pub message: &'a str,
-    pub details: &'a str
+    pub details: &'a str,
 }
 
 #[derive(Error, Debug)]
@@ -29,7 +29,7 @@ pub enum FshcError {
     #[error("failed to fetch file descriptor details for the target process")]
     IoError,
     #[error("failed to fetch file descriptor details for the target process")]
-    Other
+    Other,
 }
 
 pub trait ExitCodeProvider {
@@ -54,11 +54,11 @@ impl ExitCodeProvider for io::Error {
     fn exit_code(&self) -> ExitCode {
         match self.kind() {
             io::ErrorKind::PermissionDenied => ExitCode::NoPerm,
-            io::ErrorKind::NotFound => ExitCode::DataErr,  
+            io::ErrorKind::NotFound => ExitCode::DataErr,
             io::ErrorKind::InvalidInput => ExitCode::DataErr,
             io::ErrorKind::BrokenPipe => ExitCode::IoErr,
-            _ => ExitCode::DataErr
-        } 
+            _ => ExitCode::DataErr,
+        }
     }
 }
 
@@ -68,7 +68,7 @@ impl ExitCodeProvider for ProcError {
             ProcError::PermissionDenied(_) => ExitCode::NoPerm,
             ProcError::NotFound(_) => ExitCode::DataErr,
             ProcError::Io(_, _) => ExitCode::IoErr,
-            _ => ExitCode::Unavailable
+            _ => ExitCode::Unavailable,
         }
     }
 }
@@ -79,11 +79,11 @@ impl From<io::Error> for FshcError {
     fn from(value: io::Error) -> Self {
         match value.kind() {
             io::ErrorKind::PermissionDenied => FshcError::PermissionDenied,
-            io::ErrorKind::NotFound => FshcError::InvalidInput,  
+            io::ErrorKind::NotFound => FshcError::InvalidInput,
             io::ErrorKind::InvalidInput => FshcError::InvalidInput,
             io::ErrorKind::BrokenPipe => FshcError::IoError,
-            _ => FshcError::Other
-        } 
+            _ => FshcError::Other,
+        }
     }
 }
 
