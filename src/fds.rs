@@ -1,10 +1,8 @@
 use crate::outcome::*;
 #[cfg(target_os = "macos")]
-use libproc::libproc::file_info::ProcFDType;
-#[cfg(target_os = "macos")]
 use libproc::libproc::{
     bsd_info::BSDInfo,
-    file_info::ListFDs,
+    file_info::{ListFDs, ProcFDType},
     proc_pid::{listpidinfo, pidinfo},
 };
 #[cfg(target_os = "linux")]
@@ -19,7 +17,7 @@ impl FdList {
         let fds = listpidinfo::<ListFDs>(pid, info.pbi_nfiles as usize)?;
 
         let mut stats = ProcStats {
-            pid: pid,
+            pid,
             socket_descriptors: 0,
             file_descriptors: 0,
         };
@@ -45,15 +43,13 @@ impl FdList {
         let all_fds = proc.fd()?;
 
         let mut stats = ProcStats {
-            pid: pid,
+            pid,
             socket_descriptors: 0,
             file_descriptors: 0,
         };
-        let fds = all_fds.flatten().filter(|fd_info| match fd_info.target {
-            FDTarget::Path(_) => true,
-            FDTarget::Socket(_) => true,
-            _ => false,
-        });
+        let fds = all_fds
+            .flatten()
+            .filter(|fd_info| matches!(fd_info.target, FDTarget::Path(_) | FDTarget::Socket(_)));
         for fd in fds {
             match fd.target {
                 FDTarget::Path(_) => stats.file_descriptors += 1,
