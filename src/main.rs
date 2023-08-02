@@ -34,7 +34,7 @@ fn run(args: &CliArgs) -> FshcResult {
 fn terminate(outcome: FshcResult, args: &CliArgs) {
     match outcome {
         Ok(stats) => {
-            exit(&stats, ExitCode::Ok);
+            exit(stats, ExitCode::Ok);
         }
         Err(err) => {
             let failure = Failure {
@@ -44,7 +44,7 @@ fn terminate(outcome: FshcResult, args: &CliArgs) {
                 ),
                 details: &err.to_string(),
             };
-            exit(&failure, err.exit_code());
+            exit(failure, err.exit_code());
         }
     }
 }
@@ -54,14 +54,16 @@ fn exit<T: Serialize + fmt::Debug>(data: T, code: ExitCode) {
         ExitCode::Ok => {
             println!(
                 "{}",
-                serde_json::to_string(&data).expect(&format!("could not serialize {:?}", data))
+                serde_json::to_string(&data)
+                    .unwrap_or_else(|err| panic!("could not serialize {:?}: {}", data, err))
             );
             std::process::exit(code as i32);
         }
         _ => {
             eprintln!(
                 "{}",
-                serde_json::to_string(&data).expect(&format!("could not serialize {:?}", data))
+                serde_json::to_string(&data)
+                    .unwrap_or_else(|err| panic!("could not serialize {:?}: {}", data, err))
             );
             std::process::exit(code as i32);
         }
