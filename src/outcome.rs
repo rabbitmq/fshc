@@ -14,6 +14,16 @@ pub struct ProcStats {
     pub file_descriptors: u32,
 }
 
+impl ProcStats {
+    pub fn new(pid: Pid) -> Self {
+        Self {
+            pid,
+            socket_descriptors: 0,
+            file_descriptors: 0,
+        }
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct Failure<'a> {
     pub message: &'a str,
