@@ -1,3 +1,6 @@
+#[cfg(target_os = "windows")]
+mod windows;
+
 use crate::outcome::*;
 #[cfg(target_os = "macos")]
 use libproc::libproc::{

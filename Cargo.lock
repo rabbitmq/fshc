@@ -324,6 +324,7 @@ dependencies = [
  "serde_json",
  "sysexits",
  "thiserror",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
