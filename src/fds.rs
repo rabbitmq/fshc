@@ -12,9 +12,9 @@ pub struct FdList;
 
 #[cfg(target_os = "macos")]
 impl FdList {
-    pub fn list(pid: i32) -> Result<ProcStats, FshcError> {
-        let info = pidinfo::<BSDInfo>(pid, 0)?;
-        let fds = listpidinfo::<ListFDs>(pid, info.pbi_nfiles as usize)?;
+    pub fn list(pid: Pid) -> Result<ProcStats, FshcError> {
+        let info = pidinfo::<BSDInfo>(pid as i32, 0)?;
+        let fds = listpidinfo::<ListFDs>(pid as i32, info.pbi_nfiles as usize)?;
 
         let mut stats = ProcStats {
             pid,
@@ -38,8 +38,8 @@ impl FdList {
 
 #[cfg(target_os = "linux")]
 impl FdList {
-    pub fn list(pid: i32) -> Result<ProcStats, FshcError> {
-        let proc = Process::new(pid)?;
+    pub fn list(pid: Pid) -> Result<ProcStats, FshcError> {
+        let proc = Process::new(pid as i32)?;
         let all_fds = proc.fd()?;
 
         let mut stats = ProcStats {

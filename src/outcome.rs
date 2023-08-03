@@ -5,9 +5,11 @@ use std::io;
 use sysexits::ExitCode;
 use thiserror::Error;
 
+pub type Pid = u32;
+
 #[derive(Debug, Serialize)]
 pub struct ProcStats {
-    pub pid: i32,
+    pub pid: Pid,
     pub socket_descriptors: u32,
     pub file_descriptors: u32,
 }
@@ -20,7 +22,7 @@ pub struct Failure<'a> {
 
 #[derive(Error, Debug)]
 pub enum FshcError {
-    #[error("pid numbers greatr than 99999 are not supported")]
+    #[error("only pid numbers between 1 and 99999 are supported")]
     PidOutOfRange,
     #[error("could not locate a process for the given pid")]
     InvalidInput,

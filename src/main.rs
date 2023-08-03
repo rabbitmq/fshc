@@ -70,13 +70,10 @@ fn exit<T: Serialize + fmt::Debug>(data: T, code: ExitCode) {
     }
 }
 
-fn validate_pid(args: &CliArgs) -> Result<i32, FshcError> {
-    if args.pid > PID_LIMIT {
-        return Err(FshcError::PidOutOfRange);
-    }
-
-    match TryInto::<i32>::try_into(args.pid) {
-        Ok(val) => Ok(val),
-        Err(_) => Err(FshcError::InvalidInput),
+fn validate_pid(args: &CliArgs) -> Result<Pid, FshcError> {
+    if (1..=PID_LIMIT).contains(&args.pid) {
+        Ok(args.pid)
+    } else {
+        Err(FshcError::PidOutOfRange)
     }
 }
