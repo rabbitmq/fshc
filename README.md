@@ -5,10 +5,9 @@ counts for a process.
 
 ## Supported Operating Systems
 
+ * Windows
  * Linux
  * macOS
-
-Windows is not supported at the moment.
 
 ## Usage
 
