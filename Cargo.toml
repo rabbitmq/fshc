@@ -1,10 +1,10 @@
 [package]
 name = "fshc"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.2", features = ["derive", "help", "color"] }
+clap = { version = "4.3", features = ["derive", "help", "color"] }
 thiserror = "1"
 sysexits = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }
