@@ -22,3 +22,6 @@ features = [
   "Win32_System_WindowsProgramming",
   "Win32_Foundation"
 ]
+
+[dev-dependencies]
+cross = "0.2"

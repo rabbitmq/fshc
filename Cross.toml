@@ -1,0 +1,6 @@
+[package.metadata.cross.target.aarch64-unknown-linux-gnu]
+# dockerfile = "docker/Dockerfile.debian"
+image = "messense/rust-musl-cross:latest"
+
+[package.metadata.cross.target.x86_64-unknown-linux-gnu.env]
+image = "messense/rust-musl-cross:latest"
