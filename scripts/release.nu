@@ -38,6 +38,22 @@ if $os == 'ubuntu' {
   }
 }
 
+if $os == 'fedora' {
+  if $target == 'aarch64-unknown-linux-gnu' {
+    sudo dnf install -y gcc-aarch64-linux-gnu
+    $env.CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
+    build-with-cargo $flags
+  } else if $target == 'armv7-unknown-linux-gnueabihf' {
+    sudo dnf install pkg-config gcc-arm-linux-gnueabihf -y
+    let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
+    build-with-cargo $flags
+  } else {
+    # musl-tools to fix 'Failed to find tool. Is `musl-gcc` installed?'
+    sudo dnf install musl-tools -y
+    build-with-cargo $flags
+  }
+}
+
 
 #
 # macOS
@@ -71,7 +87,7 @@ cp -r README* $dist
 cp $executable $dist
 
 print "Compiling a release archive..."
-if $os in ['ubuntu', 'macos'] {
+if $os in ['ubuntu', 'fedora', 'macos'] {
   let archive_filename = $'($binary)-($version)-($target).tar.gz'
   print $'Release archive name: ($archive_filename)'
   tar --directory $src -c --gzip --file $archive_filename $dist
