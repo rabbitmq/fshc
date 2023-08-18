@@ -121,7 +121,8 @@ impl FdList {
                 } {
                     STATUS_SUCCESS => {
                         let name_units = unsafe {
-                            let name = (*(buffer as *const ObjectTypeInformation)).type_name;
+                            let info = buffer.cast::<ObjectTypeInformation>();
+                            let name = std::ptr::addr_of!((*info).type_name).read_unaligned();
                             std::slice::from_raw_parts(name.Buffer, name.Length as usize)
                         };
                         if &name_units[0..4.min(name_units.len())] == FILE_HANDLE_NAME {
