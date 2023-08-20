@@ -20,5 +20,6 @@ libproc = "0.13"
 version = "0.48"
 features = [
   "Win32_System_WindowsProgramming",
+  "Win32_System_Threading",
   "Win32_Foundation"
 ]
