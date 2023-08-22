@@ -8,9 +8,8 @@ use libproc::libproc::{
     file_info::{ListFDs, ProcFDType},
     proc_pid::{listpidinfo, pidinfo},
 };
-use procfs::process::FDInfo;
 #[cfg(target_os = "linux")]
-use procfs::process::{FDTarget, Process};
+use procfs::process::{FDTarget, FDInfo, Process};
 
 pub struct FdList;
 
