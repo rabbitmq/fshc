@@ -8,6 +8,7 @@ use libproc::libproc::{
     file_info::{ListFDs, ProcFDType},
     proc_pid::{listpidinfo, pidinfo},
 };
+use procfs::process::FDInfo;
 #[cfg(target_os = "linux")]
 use procfs::process::{FDTarget, Process};
 
@@ -49,16 +50,16 @@ impl FdList {
 impl FdList {
     pub fn list(pid: Pid, only_total: bool) -> Result<ProcStats, FshcError> {
         let proc = Process::new(pid as i32)?;
-        let all_fds = proc.fd()?;
+        let all_fds = proc.fd()?.flatten().collect::<Vec<FDInfo>>();
 
         let mut stats = ProcStats::new(pid);
-        stats.total_descriptors = all_fds.flatten().len() as u32;
+        stats.total_descriptors = all_fds.len() as u32;
 
         if !only_total {
             let mut fd_n = 0;
             let mut sd_n = 0;
 
-            let fds = all_fds.flatten().filter(|fd_info| {
+            let fds = all_fds.iter().filter(|fd_info| {
                 matches!(fd_info.target, FDTarget::Path(_) | FDTarget::Socket(_))
             });
             for fd in fds {
