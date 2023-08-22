@@ -142,11 +142,12 @@ impl FdList {
 
         let pid = pid as u16;
 
-        let target_handles = handles.iter().filter(|handle| handle.process_id == pid);
-        stats.total_descriptors = target_handles.count() as u32;
+        let target_handles = handles.iter().filter(|handle| handle.process_id == pid).collect::<Vec<SystemHandleTableEntryInfo>>();
+        stats.total_descriptors = target_handles.len() as u32;
 
         if !only_total {
             let n = target_handles
+                .iter()
                 .filter(|handle| handle.object_type_id == file_handle_object_type_id)
                 .count() as u32;
             stats.file_descriptors = Some(n);
