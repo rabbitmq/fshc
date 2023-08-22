@@ -9,7 +9,7 @@ use libproc::libproc::{
     proc_pid::{listpidinfo, pidinfo},
 };
 #[cfg(target_os = "linux")]
-use procfs::process::{FDTarget, FDInfo, Process};
+use procfs::process::{FDInfo, FDTarget, Process};
 
 pub struct FdList;
 
