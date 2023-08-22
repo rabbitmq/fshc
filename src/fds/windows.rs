@@ -142,7 +142,10 @@ impl FdList {
 
         let pid = pid as u16;
 
-        let target_handles = handles.iter().filter(|handle| handle.process_id == pid).collect::<Vec<SystemHandleTableEntryInfo>>();
+        let target_handles = handles
+            .iter()
+            .filter(|handle| handle.process_id == pid)
+            .collect::<Vec<SystemHandleTableEntryInfo>>();
         stats.total_descriptors = target_handles.len() as u32;
 
         if !only_total {
