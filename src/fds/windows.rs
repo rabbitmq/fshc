@@ -72,7 +72,7 @@ struct ObjectTypeInformation {
 }
 
 impl FdList {
-    pub fn list(pid: Pid) -> Result<ProcStats, FshcError> {
+    pub fn list(pid: Pid, only_total: bool) -> Result<ProcStats, FshcError> {
         let mut stats = ProcStats::new(pid);
 
         // Get the list of all open kernel object handles.
@@ -141,13 +141,16 @@ impl FdList {
             })??;
 
         let pid = pid as u16;
-        stats.total_descriptors = handles.len() as u32;
-        stats.file_descriptors = handles
-            .iter()
-            .filter(|handle| {
-                handle.process_id == pid && handle.object_type_id == file_handle_object_type_id
-            })
-            .count() as u32;
+
+        let target_handles = handles.iter().filter(|handle| handle.process_id == pid);
+        stats.total_descriptors = target_handles.count() as u32;
+
+        if !only_total {
+            let n = target_handles
+                .filter(|handle| handle.object_type_id == file_handle_object_type_id)
+                .count() as u32;
+            stats.file_descriptors = Some(n);
+        }
 
         Ok(stats)
     }

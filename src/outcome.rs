@@ -11,8 +11,10 @@ pub type Pid = u32;
 pub struct ProcStats {
     pub pid: Pid,
     pub total_descriptors: u32,
-    pub socket_descriptors: u32,
-    pub file_descriptors: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub socket_descriptors: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub file_descriptors: Option<u32>,
 }
 
 impl ProcStats {
@@ -20,8 +22,8 @@ impl ProcStats {
         Self {
             pid,
             total_descriptors: 0,
-            socket_descriptors: 0,
-            file_descriptors: 0,
+            socket_descriptors: None,
+            file_descriptors: None,
         }
     }
 }

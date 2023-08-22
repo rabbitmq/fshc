@@ -18,6 +18,11 @@ Think of it as a very small, cross-platform, more machine-friendly version of `h
 fshc --pid 73847 | jq
 ```
 
+``` shell
+# formats the output using 'jq'
+fshc --pid 73847 --only-total | jq
+```
+
 ## License
 
 This tool is dual-licensed under the ASL2 and MIT licenses.
