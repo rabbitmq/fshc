@@ -8,7 +8,7 @@ let flags = $env.TARGET_RUSTFLAGS
 
 let version = (open Cargo.toml | get package.version)
 
-let dist = $'($env.GITHUB_WORKSPACE)/dist'
+let dist = $'($env.GITHUB_WORKSPACE)/($binary)-($version)-($target)'
 let bin_suffix = if $os == 'windows' { '.exe' } else { '' }
 let executable = $'target/($target)/release/($binary)($bin_suffix)'
 
