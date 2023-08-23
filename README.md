@@ -3,6 +3,8 @@
 A tiny command line tool that prints file and socket descriptor (handle)
 counts for a process.
 
+Think of it as a very small, cross-platform, more machine-friendly version of `handle.exe`.
+
 ## Supported Operating Systems
 
  * Windows
