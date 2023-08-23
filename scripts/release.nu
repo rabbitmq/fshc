@@ -92,7 +92,7 @@ print "Compiling a release archive..."
 if $os in ['ubuntu', 'ubuntu-latest', 'macos', 'macos-latest', 'fedora', 'fedora-latest'] {
   let archive_filename = $'($binary)-($version)-($target).tar.gz'
   print $'Release archive name: ($archive_filename)'
-  tar --directory $src -c --gzip --file $archive_filename $dist
+  tar --verbose --directory $src -c --gzip --file $archive_filename $dist
   print $'archive: ---> ($archive_filename)'; ls $archive_filename
 }
 
