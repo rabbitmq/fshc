@@ -93,7 +93,8 @@ if $os in ['ubuntu', 'ubuntu-latest', 'macos', 'macos-latest', 'fedora', 'fedora
   let archive_filename = $'($binary)-($version)-($target).tar.gz'
   print $'Release archive name: ($archive_filename)'
   tar --verbose --directory $src -c --gzip --file $archive_filename $dist
-  print $'archive: ---> ($archive_filename)'; ls $archive_filename
+  print $'Release archive at ($archive_filename) is ready'
+  echo $'::set-output name=archive::($archive_filename)'
 }
 
 def 'build-with-cargo' [ options: string ] {
