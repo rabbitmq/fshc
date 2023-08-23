@@ -1,9 +1,10 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
-    - '*m'
+    - '*'
 
 defaults:
   run:
@@ -60,7 +61,7 @@ jobs:
 
       - name: Publish fshc release archive
         uses: softprops/action-gh-release@v1
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        # if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           draft: true
           files: $${{ steps.release-build.outputs.archive }}
