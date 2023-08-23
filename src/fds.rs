@@ -20,6 +20,7 @@ impl FdList {
         let fds = listpidinfo::<ListFDs>(pid as i32, info.pbi_nfiles as usize)?;
 
         let mut stats = ProcStats::new(pid);
+        stats.total_descriptors = fds.len() as u32;
         for fd in fds {
             // libproc returns file descriptor types as numbers,
             // try to convert them
@@ -42,6 +43,7 @@ impl FdList {
         let all_fds = proc.fd()?;
 
         let mut stats = ProcStats::new(pid);
+        stats.total_descriptors = fds.len() as u32;
         let fds = all_fds
             .flatten()
             .filter(|fd_info| matches!(fd_info.target, FDTarget::Path(_) | FDTarget::Socket(_)));

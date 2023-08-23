@@ -10,6 +10,7 @@ pub type Pid = u32;
 #[derive(Debug, Serialize)]
 pub struct ProcStats {
     pub pid: Pid,
+    pub total_descriptors: u32,
     pub socket_descriptors: u32,
     pub file_descriptors: u32,
 }
@@ -18,6 +19,7 @@ impl ProcStats {
     pub fn new(pid: Pid) -> Self {
         Self {
             pid,
+            total_descriptors: 0,
             socket_descriptors: 0,
             file_descriptors: 0,
         }

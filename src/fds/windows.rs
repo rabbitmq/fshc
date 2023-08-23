@@ -141,6 +141,7 @@ impl FdList {
             })??;
 
         let pid = pid as u16;
+        stats.total_descriptors = handles.len() as u32;
         stats.file_descriptors = handles
             .iter()
             .filter(|handle| {
