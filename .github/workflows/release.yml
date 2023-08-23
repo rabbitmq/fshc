@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@3.0.2
 
       - name: Install Rust toolchains
-        uses: actions-rs/toolschain@v1.0.6
+        uses: actions-rs/toolchain@v1.0.6
         with:
           override: true
           toolchain: beta
