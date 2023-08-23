@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - '*m'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  all:
+    name: All
+
+    strategy:
+      matrix:
+        target:
+          - aarch64-apple-darwin
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+        extra: ['bin']
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            target_rustflags: ''
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            target_rustflags: ''
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            target_rustflags: ''
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: actions/checkout@3.0.2
+
+      - name: Install Rust toolchains
+        uses: actions-rs/toolschain@v1.0.6
+        with:
+          override: true
+          toolchain: beta
+          target: ${{ matrix.target }}
+
+      - name: Install Nu Shell
+        uses: hustcer/setup-nu@v3
+        with:
+          version: '0.80'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build an fshc release archive
+        id: release-build
+        run: run ./scripts/release.nu
+        env:
+          OS: ${{ matrix.os }}
+          TARGET: ${{ matrix.target }}
+          TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
+
+      - name: Publish fshc release archive
+        uses: softprops/action-gh-release@v1
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        with:
+          draft: true
+          files: $${{ steps.release-build.outputs.archive }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
