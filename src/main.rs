@@ -34,7 +34,6 @@ fn run(args: &CliArgs) -> FshcResult {
     Ok(stats)
 }
 
-
 fn terminate(outcome: FshcResult, args: &CliArgs) {
     match outcome {
         Ok(stats) => {
