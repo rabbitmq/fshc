@@ -22,7 +22,8 @@ if not ('Cargo.lock' | path exists) {
 # Linux
 #
 
-if $os == 'ubuntu' {
+if $os in ['ubuntu', 'ubuntu-latest'] {
+  print "Building on Ubuntu..."
   if $target == 'aarch64-unknown-linux-gnu' {
     sudo apt-get install -y gcc-aarch64-linux-gnu
     $env.CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
@@ -38,7 +39,8 @@ if $os == 'ubuntu' {
   }
 }
 
-if $os == 'fedora' {
+if $os in ['fedora', 'fedora-latest'] {
+  print "Building on Fedora..."
   if $target == 'aarch64-unknown-linux-gnu' {
     sudo dnf install -y gcc-aarch64-linux-gnu
     $env.CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
@@ -59,7 +61,7 @@ if $os == 'fedora' {
 # macOS
 #
 
-if $os in ['macos'] {
+if $os in ['macos', 'macos-latest'] {
   print "Building on macOS..."
   build-with-cargo $flags
 }
@@ -68,7 +70,7 @@ if $os in ['macos'] {
 # Windows
 #
 
-if $os in ['windows'] {
+if $os in ['windows', 'windows-latest'] {
   print "Building on Windows..."
   cargo rustc --bin $binary --target $target --release
 }
@@ -87,7 +89,7 @@ cp -r README* $dist
 cp $executable $dist
 
 print "Compiling a release archive..."
-if $os in ['ubuntu', 'fedora', 'macos'] {
+if $os in ['ubuntu', 'ubuntu-latest', 'macos', 'macos-latest', 'fedora', 'fedora-latest'] {
   let archive_filename = $'($binary)-($version)-($target).tar.gz'
   print $'Release archive name: ($archive_filename)'
   tar --directory $src -c --gzip --file $archive_filename $dist
