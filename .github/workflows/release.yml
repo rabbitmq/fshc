@@ -53,7 +53,7 @@ jobs:
 
       - name: Build an fshc release archive
         id: release-build
-        run: run ./scripts/release.nu
+        run: nu ./scripts/release.nu
         env:
           OS: ${{ matrix.os }}
           TARGET: ${{ matrix.target }}
