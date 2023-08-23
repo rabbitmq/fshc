@@ -94,7 +94,30 @@ if $os in ['ubuntu', 'ubuntu-latest', 'macos', 'macos-latest', 'fedora', 'fedora
   print $'Release archive name: ($archive_filename)'
   tar --verbose --directory $src -c --gzip --file $archive_filename $dist
   print $'Release archive at ($archive_filename) is ready'
-  echo $'::set-output name=archive::($archive_filename)'
+  echo $'archive=($archive_filename)' | save --append $env.GITHUB_OUTPUT
+} else if $os == 'windows-latest' {
+  let releaseStem = $'($binary)-($version)-($target)'
+
+  if (get-env _EXTRA_) == 'msi' {
+      # Create Windows msi release package
+      $'Start creating Windows msi package...'
+      cd $src
+      mkdir target/release
+      cp $executable target/release/
+      let wixRelease = $'($src)/target/wix/($releaseStem).msi'
+      cargo install cargo-wix --version 0.3.2
+      cargo wix init
+      cargo wix --no-build --nocapture --output $wixRelease
+      echo $'archive=($wixRelease)' | save --append $env.GITHUB_OUTPUT
+  } else {
+      let archive_filename = $'($dist)/($releaseStem).zip'
+      7z a $archive_filename *
+      print $'Release archive at ($archive_filename)';
+      let pkg = (ls -f $archive_filename | get name)
+      if not ($pkg | empty?) {
+        echo $'archive=($pkg | get 0)' | save --append $env.GITHUB_OUTPUT
+      }
+  }
 }
 
 def 'build-with-cargo' [ options: string ] {
