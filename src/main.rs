@@ -12,7 +12,10 @@ use crate::outcome::*;
 const PID_LIMIT: u32 = 99_999;
 
 #[derive(Parser, Debug)]
+#[command(version = clap::crate_version!(), about = "File and socket handle counter", long_about = None)]
 struct CliArgs {
+    #[arg(long)]
+    only_total: bool,
     #[arg(short, long)]
     pid: u32,
 }
@@ -26,7 +29,11 @@ fn main() {
 
 fn run(args: &CliArgs) -> FshcResult {
     let pid = validate_pid(args)?;
-    let stats = FdList::list(pid)?;
+    let stats = if args.only_total {
+        FdList::list_total(pid)?
+    } else {
+        FdList::list_by_type(pid)?
+    };
 
     Ok(stats)
 }

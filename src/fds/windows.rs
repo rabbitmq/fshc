@@ -2,10 +2,25 @@ use super::*;
 
 use std::ffi::c_void;
 use windows_sys::Win32::{
-    Foundation::{HANDLE, STATUS_INFO_LENGTH_MISMATCH, STATUS_SUCCESS, UNICODE_STRING},
+    Foundation::{
+        // https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
+        GetLastError as get_last_error,
+        FALSE,
+        HANDLE,
+        STATUS_INFO_LENGTH_MISMATCH,
+        STATUS_SUCCESS,
+        UNICODE_STRING,
+    },
     System::{
-        // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
-        Threading::GetCurrentProcessId as get_current_process_id,
+        Threading::{
+            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
+            GetCurrentProcessId as get_current_process_id,
+            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesshandlecount
+            GetProcessHandleCount as get_process_handle_count,
+            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess
+            OpenProcess as open_process,
+            PROCESS_QUERY_LIMITED_INFORMATION,
+        },
         WindowsProgramming::{
             // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryobject
             NtQueryObject as nt_query_object,
@@ -72,7 +87,7 @@ struct ObjectTypeInformation {
 }
 
 impl FdList {
-    pub fn list(pid: Pid) -> Result<ProcStats, FshcError> {
+    pub fn list_by_type(pid: Pid) -> Result<ProcStats, FshcError> {
         let mut stats = ProcStats::new(pid);
 
         // Get the list of all open kernel object handles.
@@ -141,13 +156,31 @@ impl FdList {
             })??;
 
         let pid = pid as u16;
-        stats.file_descriptors = handles
-            .iter()
-            .filter(|handle| {
-                handle.process_id == pid && handle.object_type_id == file_handle_object_type_id
-            })
-            .count() as u32;
+        let mut file_descriptors = 0u32;
+        for handle in handles.iter().filter(|handle| handle.process_id == pid) {
+            stats.total_descriptors += 1;
+            if handle.object_type_id == file_handle_object_type_id {
+                file_descriptors += 1;
+            }
+        }
+        stats.file_descriptors = Some(file_descriptors);
 
         Ok(stats)
+    }
+
+    pub fn list_total(pid: Pid) -> Result<ProcStats, FshcError> {
+        let mut stats = ProcStats::new(pid);
+
+        let process_handle = unsafe { open_process(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid) };
+        if unsafe { get_process_handle_count(process_handle, &mut stats.total_descriptors) }
+            == FALSE
+        {
+            let code = unsafe { get_last_error() };
+            Err(FshcError::from(format!(
+                "Failed to get process handle count with code {code}"
+            )))
+        } else {
+            Ok(stats)
+        }
     }
 }
