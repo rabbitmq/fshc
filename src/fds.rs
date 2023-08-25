@@ -9,7 +9,7 @@ use libproc::libproc::{
     proc_pid::{listpidinfo, pidinfo},
 };
 #[cfg(target_os = "linux")]
-use procfs::process::{FDInfo, FDTarget, Process};
+use procfs::process::{FDTarget, Process};
 
 pub struct FdList;
 
@@ -61,18 +61,15 @@ impl FdList {
 impl FdList {
     pub fn list_by_type(pid: Pid) -> Result<ProcStats, FshcError> {
         let proc = Process::new(pid as i32)?;
-        let all_fds = proc.fd()?.flatten().collect::<Vec<FDInfo>>();
+        let all_fds = proc.fd()?.flatten();
 
         let mut stats = ProcStats::new(pid);
-        stats.total_descriptors = all_fds.len() as u32;
 
         let mut fd_n = 0;
         let mut sd_n = 0;
 
-        let fds = all_fds
-            .iter()
-            .filter(|fd_info| matches!(fd_info.target, FDTarget::Path(_) | FDTarget::Socket(_)));
-        for fd in fds {
+        for fd in all_fds {
+            stats.total_descriptors += 1;
             match fd.target {
                 FDTarget::Path(_) => fd_n += 1,
                 FDTarget::Socket(_) => sd_n += 1,
@@ -88,11 +85,11 @@ impl FdList {
 
     pub fn list_total(pid: Pid) -> Result<ProcStats, FshcError> {
         let proc = Process::new(pid as i32)?;
-        let all_fds = proc.fd()?.flatten().collect::<Vec<FDInfo>>();
+        let total_descriptors = proc.fd()?.flatten().count() as u32;
 
         let stats = ProcStats {
             pid,
-            total_descriptors: all_fds.len() as u32,
+            total_descriptors,
             socket_descriptors: None,
             file_descriptors: None,
         };
