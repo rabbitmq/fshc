@@ -2,10 +2,25 @@ use super::*;
 
 use std::ffi::c_void;
 use windows_sys::Win32::{
-    Foundation::{HANDLE, STATUS_INFO_LENGTH_MISMATCH, STATUS_SUCCESS, UNICODE_STRING},
+    Foundation::{
+        // https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
+        GetLastError as get_last_error,
+        FALSE,
+        HANDLE,
+        STATUS_INFO_LENGTH_MISMATCH,
+        STATUS_SUCCESS,
+        UNICODE_STRING,
+    },
     System::{
-        // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
-        Threading::GetCurrentProcessId as get_current_process_id,
+        Threading::{
+            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
+            GetCurrentProcessId as get_current_process_id,
+            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesshandlecount
+            GetProcessHandleCount as get_process_handle_count,
+            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess
+            OpenProcess as open_process,
+            PROCESS_QUERY_LIMITED_INFORMATION,
+        },
         WindowsProgramming::{
             // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryobject
             NtQueryObject as nt_query_object,
@@ -141,18 +156,14 @@ impl FdList {
             })??;
 
         let pid = pid as u16;
-
-        let target_handles = handles
-            .iter()
-            .filter(|handle| handle.process_id == pid)
-            .collect::<Vec<&SystemHandleTableEntryInfo>>();
-        stats.total_descriptors = target_handles.len() as u32;
-
-        let n = target_handles
-            .iter()
-            .filter(|handle| handle.object_type_id == file_handle_object_type_id)
-            .count() as u32;
-        stats.file_descriptors = Some(n);
+        let mut file_descriptors = 0u32;
+        for handle in handles.iter().filter(|handle| handle.process_id == pid) {
+            stats.total_descriptors += 1;
+            if handle.object_type_id == file_handle_object_type_id {
+                file_descriptors += 1;
+            }
+        }
+        stats.file_descriptors = Some(file_descriptors);
 
         Ok(stats)
     }
@@ -160,79 +171,16 @@ impl FdList {
     pub fn list_total(pid: Pid) -> Result<ProcStats, FshcError> {
         let mut stats = ProcStats::new(pid);
 
-        // Get the list of all open kernel object handles.
-        let mut buffer: Vec<usize> = Vec::with_capacity(SYSTEM_HANDLE_INFO_BUFFER_SIZE);
-        loop {
-            buffer.resize(buffer.len() + SYSTEM_HANDLE_INFO_BUFFER_SIZE, 0);
-            let mut return_length: u32 = 0;
-            match unsafe {
-                nt_query_system_information(
-                    SYSTEM_HANDLE_INFORMATION,
-                    buffer.as_mut_ptr() as *mut c_void,
-                    buffer.len() as u32,
-                    &mut return_length,
-                )
-            } {
-                // We can't query the size of the list so we query
-                // repeatedly, increasing the size of the input buffer
-                // linearly on each iteration.
-                STATUS_INFO_LENGTH_MISMATCH => continue,
-                STATUS_SUCCESS => break,
-                other => {
-                    return Err(format!("Failed to query for all handles with code {other}").into())
-                }
-            }
+        let process_handle = unsafe { open_process(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid) };
+        if unsafe { get_process_handle_count(process_handle, &mut stats.total_descriptors) }
+            == FALSE
+        {
+            let code = unsafe { get_last_error() };
+            Err(FshcError::from(format!(
+                "Failed to get process handle count with code {code}"
+            )))
+        } else {
+            Ok(stats)
         }
-        let handles = unsafe {
-            let info = &*(buffer.as_ptr() as *const SystemHandleInformation);
-            std::slice::from_raw_parts(info.handles.as_ptr(), info.number_of_handles as usize)
-        };
-
-        let current_process_id = unsafe { get_current_process_id() } as u16;
-        let file_handle_object_type_id = handles
-            .iter()
-            .filter(|handle| handle.process_id == current_process_id)
-            .find_map(|handle| {
-                let buffer = [0; OBJECT_INFO_BUFFER_SIZE].as_mut_ptr();
-                let mut return_length: u32 = 0;
-                match unsafe {
-                    nt_query_object(
-                        handle.handle as HANDLE,
-                        OBJECT_TYPE_INFORMATION,
-                        buffer as *mut c_void,
-                        OBJECT_INFO_BUFFER_SIZE as u32,
-                        &mut return_length,
-                    )
-                } {
-                    STATUS_SUCCESS => {
-                        let name_units = unsafe {
-                            let info = buffer.cast::<ObjectTypeInformation>();
-                            let name = std::ptr::addr_of!((*info).type_name).read_unaligned();
-                            std::slice::from_raw_parts(name.Buffer, name.Length as usize)
-                        };
-                        if &name_units[0..4.min(name_units.len())] == FILE_HANDLE_NAME {
-                            Some(Ok(handle.object_type_id))
-                        } else {
-                            None
-                        }
-                    }
-                    other => Some(Err(FshcError::from(format!(
-                        "Failed to query handle information with code {other}"
-                    )))),
-                }
-            })
-            .ok_or_else(|| {
-                FshcError::from("Failed to find file handles in the current process".to_string())
-            })??;
-
-        let pid = pid as u16;
-
-        let target_handles = handles
-            .iter()
-            .filter(|handle| handle.process_id == pid)
-            .collect::<Vec<&SystemHandleTableEntryInfo>>();
-        stats.total_descriptors = target_handles.len() as u32;
-
-        Ok(stats)
     }
 }
