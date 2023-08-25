@@ -29,7 +29,11 @@ fn main() {
 
 fn run(args: &CliArgs) -> FshcResult {
     let pid = validate_pid(args)?;
-    let stats = FdList::list(pid, args.only_total)?;
+    let stats = if args.only_total {
+        FdList::list_total(pid)?
+    } else {
+        FdList::list_by_type(pid)?
+    };
 
     Ok(stats)
 }
