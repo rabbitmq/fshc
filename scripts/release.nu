@@ -85,7 +85,7 @@ if $os in ['windows', 'windows-latest'] {
 cd $src
 rm -rf $dist
 mkdir $dist
-print $'Copying release files in ($env.pwd) to ($dist)...'
+print $'Copying release files in ($env.PWD) to ($dist)...'
 
 cp -r LICENSE* $dist
 cp -r README* $dist
