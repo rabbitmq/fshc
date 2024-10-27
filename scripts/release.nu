@@ -95,7 +95,7 @@ print "Compiling a release archive..."
 if $os in ['ubuntu', 'ubuntu-latest', 'macos', 'macos-latest', 'fedora', 'fedora-latest'] {
   let archive_filename = $'($binary)-($version)-($target).tar.gz'
   print $'Release archive name: ($archive_filename)'
-  tar --verbose --directory $src -c --gzip --file $archive_filename $dist
+  tar --verbose --directory $src -c --gzip --file $archive_filename $'./($dist)'
   print $'Release archive at ($archive_filename) is ready'
   echo $'archive=($archive_filename)' | save --append $env.GITHUB_OUTPUT
 } else if $os == 'windows-latest' {
