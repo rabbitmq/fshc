@@ -72,7 +72,7 @@ if $os in ['macos', 'macos-latest'] {
 
 if $os in ['windows', 'windows-latest'] {
   print "Building on Windows..."
-  cargo rustc --bin $binary --target $target --release
+  cargo rustc --bin $binary --target $target --target-dir $'($env.GITHUB_WORKSPACE)/target/($target) --release
 }
 
 #
