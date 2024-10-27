@@ -10,7 +10,11 @@ let version = (open Cargo.toml | get package.version)
 
 let dist = $'($env.GITHUB_WORKSPACE)/($binary)-($version)-($target)'
 let bin_suffix = if $os == 'windows' { '.exe' } else { '' }
-let executable = $'($env.GITHUB_WORKSPACE)/target/($target)/release/($binary)($bin_suffix)'
+let executable = if $os == 'windows' {
+    $'($env.GITHUB_WORKSPACE)/target/($target)/release/($binary)($bin_suffix)'
+  } else {
+    $'($env.GITHUB_WORKSPACE)/($binary)($bin_suffix)'
+  }
 
 print $'Packaging ($binary) v($version) for ($target) in ($src)...'
 
