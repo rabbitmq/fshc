@@ -11,12 +11,11 @@ defaults:
     shell: bash
 
 jobs:
-  all:
-    name: All
+  release:
+    name: Release for all platforms
 
     strategy:
       matrix:
-        extra: ['bin']
         include:
           # macOS, aarch64
           - target: aarch64-apple-darwin
