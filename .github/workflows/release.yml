@@ -35,7 +35,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3.5.2
+      - uses: actions/checkout@v4
 
       - name: Install Rust toolchains
         uses: dtolnay/rust-toolchain@beta
@@ -59,7 +59,7 @@ jobs:
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
 
       - name: Publish fshc release archive
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         # if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           tag_name: v1.1.0
