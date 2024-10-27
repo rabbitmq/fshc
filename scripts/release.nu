@@ -10,11 +10,9 @@ let version = (open Cargo.toml | get package.version)
 
 let dist = $'($env.GITHUB_WORKSPACE)/($binary)-($version)-($target)'
 let bin_suffix = if $os == 'windows' { '.exe' } else { '' }
-let executable = if $os == 'windows' {
-    $'($env.GITHUB_WORKSPACE)/($binary)($bin_suffix)'
-  } else {
-    $'($env.GITHUB_WORKSPACE)/target/($target)/release/($binary)($bin_suffix)'
-  }
+let unix_executable = $'($env.GITHUB_WORKSPACE)/target/($target)/release/($binary)($bin_suffix)'
+let windows_executable = $'($env.GITHUB_WORKSPACE)/($binary)($bin_suffix)'
+let executable = if $os == 'windows' { $windows_executable } else { $unix_executable }
 
 print $'Packaging ($binary) v($version) for ($target) in ($src)...'
 print $'Executable path is ($executable)...'
@@ -35,7 +33,7 @@ if $os in ['ubuntu', 'ubuntu-latest'] {
     build-with-cargo $flags
   } else if $target == 'armv7-unknown-linux-gnueabihf' {
     sudo apt-get install pkg-config gcc-arm-linux-gnueabihf -y
-    let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
+    $env.CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = "arm-linux-gnueabihf-gcc"
     build-with-cargo $flags
   } else {
     # musl-tools to fix 'Failed to find tool. Is `musl-gcc` installed?'
@@ -52,7 +50,7 @@ if $os in ['fedora', 'fedora-latest'] {
     build-with-cargo $flags
   } else if $target == 'armv7-unknown-linux-gnueabihf' {
     sudo dnf install pkg-config gcc-arm-linux-gnueabihf -y
-    let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
+    $env.CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
     build-with-cargo $flags
   } else {
     # musl-tools to fix 'Failed to find tool. Is `musl-gcc` installed?'
@@ -77,7 +75,7 @@ if $os in ['macos', 'macos-latest'] {
 
 if $os in ['windows', 'windows-latest'] {
   print "Building on Windows..."
-  cargo rustc --bin $binary --target $target --target-dir $'($env.GITHUB_WORKSPACE)/target/($target) --release
+  cargo rustc --bin $binary --target $target --target-dir $env.GITHUB_WORKSPACE --release
 }
 
 #
