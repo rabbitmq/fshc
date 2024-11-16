@@ -8,7 +8,7 @@ let flags = $env.TARGET_RUSTFLAGS
 
 let version = (open Cargo.toml | get package.version)
 
-let dist = $'($env.GITHUB_WORKSPACE)/($binary)-($version)-($target)'
+let dist = $'($env.GITHUB_WORKSPACE)/release/($binary)-($version)-($target)'
 let bin_suffix = if $os == 'windows' { '.exe' } else { '' }
 let unix_executable = $'($env.GITHUB_WORKSPACE)/target/($target)/release/($binary)($bin_suffix)'
 let windows_executable = $dist
@@ -82,7 +82,7 @@ if $os in ['windows', 'windows-latest'] {
 # Release packaging
 #
 
-cd $src
+cd $env.GITHUB_WORKSPACE/release/($binary).($windows_executable)
 rm -rf $dist
 mkdir $dist
 print $'Copying release files in ($env.PWD) to ($dist)...'

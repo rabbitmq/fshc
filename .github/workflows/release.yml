@@ -14,6 +14,8 @@ jobs:
   release:
     name: Release for all platforms
 
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         include:
@@ -38,8 +40,6 @@ jobs:
             os: ubuntu-latest
             target_rustflags: ''
 
-    runs-on: ${{matrix.os}}
-
     permissions:
       id-token: write
       contents: write
@@ -60,9 +60,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build an fshc release archive
+      - name: Build an fshc release archive on macOS
         id: release-build
-        run: nu ./scripts/release.nu
+        if: ${{ env.OS == "macos-latest" }}
+        run: nu ./scripts/release-macos.nu
+        env:
+          OS: ${{ matrix.os }}
+          TARGET: ${{ matrix.target }}
+          TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
+
+      - name: Build an fshc release archive on Linux
+        id: release-build
+        if: ${{ env.OS == "ubuntu-latest" }}
+        run: nu ./scripts/release-linux.nu
+        env:
+          OS: ${{ matrix.os }}
+          TARGET: ${{ matrix.target }}
+          TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
+
+      - name: Build an fshc release archive on Windows
+        id: release-build
+        if: ${{ env.OS == "windows-latest" }}
+        run: nu ./scripts/release-windows.nu
         env:
           OS: ${{ matrix.os }}
           TARGET: ${{ matrix.target }}
