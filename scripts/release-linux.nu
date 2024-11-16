@@ -4,7 +4,6 @@ let binary = 'fshc'
 let src = $env.SRC | path expand
 let os = $env.OS
 let target = $env.TARGET
-let flags = $env.TARGET_RUSTFLAGS
 
 let version = (open Cargo.toml | get package.version)
 let release_dir = $'($env.SRC)/target/($target)/release' | path expand
@@ -21,7 +20,7 @@ rm -rf $release_dir
 mkdir $release_dir
 
 print $'Building on Linux in ($src)...'
-build-with-cargo $flags
+build-with-cargo
 
 #
 # Linux
@@ -32,15 +31,15 @@ if $os in ['ubuntu', 'ubuntu-latest'] {
   if $target == 'aarch64-unknown-linux-gnu' {
     sudo apt-get install -y gcc-aarch64-linux-gnu
     $env.CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
-    build-with-cargo $flags
+    build-with-cargo
   } else if $target == 'armv7-unknown-linux-gnueabihf' {
     sudo apt-get install pkg-config gcc-arm-linux-gnueabihf -y
     $env.CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = "arm-linux-gnueabihf-gcc"
-    build-with-cargo $flags
+    build-with-cargo
   } else {
     # musl-tools to fix 'Failed to find tool. Is `musl-gcc` installed?'
     sudo apt-get install musl-tools -y
-    build-with-cargo $flags
+    build-with-cargo
   }
 }
 
@@ -49,11 +48,11 @@ if $os in ['fedora', 'fedora-latest'] {
   if $target == 'aarch64-unknown-linux-gnu' {
     sudo dnf install -y gcc-aarch64-linux-gnu
     $env.CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
-    build-with-cargo $flags
+    build-with-cargo
   } else if $target == 'armv7-unknown-linux-gnueabihf' {
     sudo dnf install pkg-config gcc-arm-linux-gnueabihf -y
     $env.CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
-    build-with-cargo $flags
+    build-with-cargo
   }
 }
 
@@ -81,10 +80,6 @@ tar --verbose -C $release_dir -czf $archive_filename $binary
 print $'Release archive at ($archive_filename) is ready'
 echo $'archive=($archive_filename)' | save --append $env.GITHUB_OUTPUT
 
-def 'build-with-cargo' [ options: string ] {
-  if ($options | str trim | is-empty) {
-    cargo rustc --bin $binary --target $target --release
-  } else {
-    cargo rustc --bin $binary --target $target --release $options
-  }
+def 'build-with-cargo' [] {
+  cargo rustc --bin $binary --target $target --release
 }

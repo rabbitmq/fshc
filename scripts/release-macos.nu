@@ -3,7 +3,6 @@
 let binary = 'fshc'
 let src = $env.SRC | path expand
 let target = $env.TARGET
-let flags = $env.TARGET_RUSTFLAGS
 
 let version = (open Cargo.toml | get package.version)
 let release_dir = $'($env.SRC)/target/($target)/release' | path expand
@@ -20,7 +19,7 @@ rm -rf $release_dir
 mkdir $release_dir
 
 print $'Building on macOS in ($src)...'
-build-with-cargo $flags
+build-with-cargo
 
 
 #
@@ -46,10 +45,6 @@ tar --verbose -czf $'($release_dir)/($archive_filename)' $executable
 print $'Release archive at ($archive_filename) is ready'
 echo $'archive=($archive_filename)' | save --append $env.GITHUB_OUTPUT
 
-def 'build-with-cargo' [ options: string ] {
-  if ($options | str trim | is-empty) {
-    cargo rustc --bin $binary --target $target --release
-  } else {
-    cargo rustc --bin $binary --target $target --release $options
-  }
+def 'build-with-cargo' [] {
+  cargo rustc --bin $binary --target $target --release
 }
