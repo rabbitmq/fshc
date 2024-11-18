@@ -12,7 +12,7 @@ use crate::outcome::*;
 const PID_LIMIT: u32 = 99_999;
 
 #[derive(Parser, Debug)]
-#[command(version = clap::crate_version!(), about = "File and socket handle counter", long_about = None)]
+#[command(version = clap::crate_version!(), about = "File and socket handle counter", long_about = None, after_help = "GitHub: https://github.com/rabbitmq/fshc")]
 struct CliArgs {
     #[arg(long)]
     only_total: bool,
