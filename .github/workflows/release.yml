@@ -82,12 +82,12 @@ jobs:
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
           SRC: ${{ github.workspace }}
 
-      - name: Publish fshc release archive
-        uses: softprops/action-gh-release@v2
-        # if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        with:
-          tag_name: v1.1.0
-          draft: false
-          files: ${{ steps.release-build.outputs.archive }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Publish fshc release archive
+      #   uses: softprops/action-gh-release@v2
+      #   # if: ${{ startsWith(github.ref, 'refs/tags/') }}
+      #   with:
+      #     tag_name: v${{ vars.NEXT_RELESE_VERSION }}
+      #     draft: false
+      #     files: TODO
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
