@@ -62,7 +62,7 @@ jobs:
 
       - name: Build an fshc release archive on macOS
         id: release-build
-        if: ${{ matrix.os == "macos-latest" }}
+        if: ${{ matrix.os == 'macos-latest' }}
         run: nu ./scripts/release-macos.nu
         env:
           OS: ${{ matrix.os }}
@@ -71,7 +71,7 @@ jobs:
 
       - name: Build an fshc release archive on Linux
         id: release-build
-        if: ${{ matrix.os == "ubuntu-latest" }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: nu ./scripts/release-linux.nu
         env:
           OS: ${{ matrix.os }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Build an fshc release archive on Windows
         id: release-build
-        if: ${{ matrix.os == "windows-latest" }}
+        if: ${{ matrix.os == 'windows-latest' }}
         run: nu ./scripts/release-windows.nu
         env:
           OS: ${{ matrix.os }}
