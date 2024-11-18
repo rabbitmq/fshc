@@ -62,13 +62,13 @@ jobs:
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
           SRC: ${{ github.workspace }}
       - name: Store macOS build artifact
-          id: upload-macos-artifact
-          if: ${{ matrix.os == 'macos-latest' }}
-          uses: actions/upload-artifact@v4
-          with:
-            name:
-            path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
-            retention-days: 2
+        id: upload-macos-artifact
+        if: ${{ matrix.os == 'macos-latest' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name:
+          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
+          retention-days: 2
 
       - name: Build an fshc release archive on Linux
         id: release-build-linux
