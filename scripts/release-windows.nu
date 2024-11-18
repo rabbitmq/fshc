@@ -1,8 +1,9 @@
 #!/usr/bin/env nu
 
-let binary = 'fshc'
+const binary = 'fshc'
+const binary_filename = $'($binary).exe'
 let src = $env.SRC | path expand
-let target = $env.TARGET
+let target = $env.TARGET | default $"x86_64-pc-windows-msvc"
 
 let version = (open Cargo.toml | get package.version)
 let release_dir = $'($env.SRC)/target/($target)/release' | path expand
@@ -19,14 +20,7 @@ rm -rf $release_dir
 mkdir $release_dir
 
 print $'Building on Windows in ($src)...'
-build-with-cargo
-
-#
-# Windows
-#
-
-print "Building on Windows..."
-cargo rustc --bin $binary --target $target --target-dir $env.GITHUB_WORKSPACE --release
+cargo rustc --bin $binary --target $target --release
 
 #
 # Release packaging
@@ -45,13 +39,9 @@ ls $release_dir
 
 let archive_filename = $'($binary)-($version)-($target).zip'
 print $'Release archive name: ($archive_filename)'
-7z a $archive_filename $binary
-print $'Release archive at ($archive_filename)';
-let pkg = (ls -f $archive_filename | get name)
-if not ($pkg | empty?) {
-  echo $'archive=($pkg | get 0)' | save --append $env.GITHUB_OUTPUT
-}
+7z a $archive_filename $binary_filename
 
-def 'build-with-cargo' [] {
-  cargo rustc --bin $binary --target $target --release
+let pkg = (ls -f $archive_filename | get name)
+if not ($pkg | is-empty) {
+  echo $'archive=($pkg | get 0)' | save --append $env.GITHUB_OUTPUT
 }
