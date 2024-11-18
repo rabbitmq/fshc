@@ -41,7 +41,7 @@ print "Compiling a release archive..."
 
 let archive_filename = $'($binary)-($version)-($target).tar.gz'
 print $'Release archive name: ($archive_filename)'
-tar --verbose -czf $'($release_dir)/($archive_filename)' $executable
+tar --verbose -czf $'($release_dir)/($archive_filename)' $binary
 print $'Release archive at ($archive_filename) is ready'
 echo $'archive=($archive_filename)' | save --append $env.GITHUB_OUTPUT
 
