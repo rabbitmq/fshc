@@ -12,7 +12,7 @@ defaults:
 
 jobs:
   release:
-    name: Release for all platforms
+    name: Build and Archive
 
     runs-on: ${{ matrix.os }}
 
