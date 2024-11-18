@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build an fshc release archive on macOS
-        id: release-build
+        id: release-build-macos
         if: ${{ matrix.os == 'macos-latest' }}
         run: nu ./scripts/release-macos.nu
         env:
@@ -70,7 +70,7 @@ jobs:
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
 
       - name: Build an fshc release archive on Linux
-        id: release-build
+        id: release-build-linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: nu ./scripts/release-linux.nu
         env:
@@ -79,7 +79,7 @@ jobs:
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
 
       - name: Build an fshc release archive on Windows
-        id: release-build
+        id: release-build-windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: nu ./scripts/release-windows.nu
         env:
