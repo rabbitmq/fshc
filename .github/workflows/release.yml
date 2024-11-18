@@ -68,6 +68,7 @@ jobs:
           OS: ${{ matrix.os }}
           TARGET: ${{ matrix.target }}
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
+          SRC: ${{ github.workspace }}
 
       - name: Build an fshc release archive on Linux
         id: release-build-linux
@@ -77,6 +78,7 @@ jobs:
           OS: ${{ matrix.os }}
           TARGET: ${{ matrix.target }}
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
+          SRC: ${{ github.workspace }}
 
       - name: Build an fshc release archive on Windows
         id: release-build-windows
@@ -86,6 +88,7 @@ jobs:
           OS: ${{ matrix.os }}
           TARGET: ${{ matrix.target }}
           TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
+          SRC: ${{ github.workspace }}
 
       - name: Publish fshc release archive
         uses: softprops/action-gh-release@v2
