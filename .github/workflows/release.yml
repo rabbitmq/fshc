@@ -66,7 +66,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
+          name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
           path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
           retention-days: 2
 
@@ -84,7 +84,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
+          name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
           path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
           retention-days: 2
 
@@ -102,16 +102,34 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.zip"
+          name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.zip"
           path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.zip"
           retention-days: 2
 
-      # - name: Publish fshc release archive
-      #   uses: softprops/action-gh-release@v2
-      #   # if: ${{ startsWith(github.ref, 'refs/tags/') }}
-      #   with:
-      #     tag_name: v${{ vars.NEXT_RELESE_VERSION }}
-      #     draft: false
-      #     files: TODO
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  create_gh_release:
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Fetch macOS archive
+      uses: actions/download-artifact@v4
+      with:
+        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-aarch64-apple-darwin.tar.gz"
+        path: ./artifacts
+    - name: Fetch Linux archive
+      uses: actions/download-artifact@v4
+      with:
+        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-x86_64-unknown-linux-gnu.tar.gz"
+        path: ./artifacts
+    - name: Fetch Windows archive
+      uses: actions/download-artifact@v4
+      with:
+        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-x86_64-pc-windows-gnu.zip"
+        path: ./artifacts
+    - name: Publish fshc release archive
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ vars.NEXT_RELESE_VERSION }}
+        draft: false
+        files: ./artifacts/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
