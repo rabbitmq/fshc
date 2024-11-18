@@ -3,13 +3,20 @@
 A tiny command line tool that prints file and socket descriptor (handle)
 counts for a process.
 
-Think of it as a very small, cross-platform, more machine-friendly version of `handle.exe`.
+Think of it as a very small, cross-platform, more machine-friendly version of `handle.exe`
+that only does one thing (and hopefully does it well).
 
 ## Supported Operating Systems
 
  * Windows
  * Linux
  * macOS
+
+
+## Binary Builds
+
+See [Releases](https://github.com/rabbitmq/fshc/releases).
+
 
 ## Usage
 
