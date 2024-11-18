@@ -33,3 +33,5 @@ fshc --pid 73847 --only-total | jq
 ## License
 
 This tool is dual-licensed under the ASL2 and MIT licenses.
+
+SPDX-License-Identifier: MIT OR Apache-2.0
