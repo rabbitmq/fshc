@@ -41,7 +41,22 @@ let archive_filename = $'($binary)-($version)-($target).zip'
 print $'Release archive name: ($archive_filename)'
 7z a $archive_filename $binary_filename
 
-let pkg = (ls -f $archive_filename | get name)
+print $'(char nl)(ansi g)Archive contents:(ansi reset)'; hr-line; ls | print
+let archive = $'($release_dir)/($archive_filename).zip'
+7z a $archive ...(glob *)
+let pkg = (ls -f $archive | get name)
 if not ($pkg | is-empty) {
-  echo $'archive=($pkg | get 0)' | save --append $env.GITHUB_OUTPUT
+    # Workaround for https://github.com/softprops/action-gh-release/issues/280
+    let archive = ($pkg | get 0 | str replace --all '\' '/')
+    print $'Zip archive path: ($archive)'
+    echo $"archive=($archive)" | save --append $env.GITHUB_OUTPUT
+}
+
+
+# Print a horizontal line marker
+def 'hr-line' [
+    --blank-line(-b)
+] {
+    print $'(ansi g)---------------------------------------------------------------------------->(ansi reset)'
+    if $blank_line { char nl }
 }
