@@ -3,9 +3,9 @@ use super::*;
 use std::ffi::c_void;
 use windows_sys::Win32::{
     Foundation::{
+        FALSE,
         // https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
         GetLastError as get_last_error,
-        FALSE,
         HANDLE,
         STATUS_INFO_LENGTH_MISMATCH,
         STATUS_SUCCESS,
@@ -109,7 +109,7 @@ impl FdList {
                 STATUS_INFO_LENGTH_MISMATCH => continue,
                 STATUS_SUCCESS => break,
                 other => {
-                    return Err(format!("Failed to query for all handles with code {other}").into())
+                    return Err(format!("Failed to query for all handles with code {other}").into());
                 }
             }
         }
