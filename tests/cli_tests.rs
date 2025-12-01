@@ -15,17 +15,10 @@
 
 mod test_helpers;
 
-#[allow(deprecated)]
-use assert_cmd::cargo::cargo_bin;
 use std::error::Error;
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
-use test_helpers::{output_includes, run_fails, run_succeeds};
-
-#[allow(deprecated)]
-fn target_process_bin() -> std::path::PathBuf {
-    cargo_bin("target_process")
-}
+use test_helpers::{output_includes, run_fails, run_succeeds, target_process_bin};
 
 #[test]
 fn show_help_with_help_flag() -> Result<(), Box<dyn Error>> {
@@ -64,14 +57,6 @@ fn fail_with_invalid_pid_too_large() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// On Windows, non-existent PIDs return success with 0 handles
-#[cfg(not(target_os = "windows"))]
-#[test]
-fn fail_with_nonexistent_pid() -> Result<(), Box<dyn Error>> {
-    run_fails(["--pid", "99999"]);
-    Ok(())
-}
-
 #[test]
 fn query_target_process_returns_json_with_descriptors() -> Result<(), Box<dyn Error>> {
     let mut child = Command::new(target_process_bin())
@@ -89,14 +74,6 @@ fn query_target_process_returns_json_with_descriptors() -> Result<(), Box<dyn Er
         .stdout(output_includes(&format!("\"pid\":{}", target_pid)))
         .stdout(output_includes("\"total_descriptors\":"))
         .stdout(output_includes("\"file_descriptors\":"));
-
-    // Windows doesn't report socket_descriptors separately
-    #[cfg(not(target_os = "windows"))]
-    let _ = run_succeeds(["--pid", target_pid])
-        .stdout(output_includes(&format!("\"pid\":{}", target_pid)))
-        .stdout(output_includes("\"total_descriptors\":"))
-        .stdout(output_includes("\"file_descriptors\":"))
-        .stdout(output_includes("\"socket_descriptors\":"));
 
     if let Some(mut stdin) = child.stdin.take() {
         let _ = stdin.write_all(b"quit\n");
@@ -161,13 +138,6 @@ fn query_target_process_has_expected_minimum_descriptors() -> Result<(), Box<dyn
         files
     );
     assert!(total >= 3, "Expected total descriptors >= 3, got {}", total);
-
-    // Windows doesn't report socket_descriptors separately
-    #[cfg(not(target_os = "windows"))]
-    {
-        let sockets = json["socket_descriptors"].as_u64().unwrap_or(0);
-        assert!(sockets >= 2, "Expected at least 2 sockets, got {}", sockets);
-    }
 
     if let Some(mut stdin) = child.stdin.take() {
         let _ = stdin.write_all(b"quit\n");

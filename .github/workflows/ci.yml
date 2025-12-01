@@ -30,7 +30,7 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all --check
 
-  build:
+  build-and-test:
     needs: lint
     strategy:
       fail-fast: false

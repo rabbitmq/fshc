@@ -16,10 +16,13 @@
 #![allow(dead_code)]
 
 use assert_cmd::assert::Assert;
+#[allow(deprecated)]
+use assert_cmd::cargo::cargo_bin;
 use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::predicate;
 use predicates::str::ContainsPredicate;
 use std::ffi::OsStr;
+use std::path::PathBuf;
 
 pub fn run_succeeds<I, S>(args: I) -> Assert
 where
@@ -39,4 +42,9 @@ where
 
 pub fn output_includes(content: &str) -> ContainsPredicate {
     predicate::str::contains(content)
+}
+
+#[allow(deprecated)]
+pub fn target_process_bin() -> PathBuf {
+    cargo_bin("target_process")
 }

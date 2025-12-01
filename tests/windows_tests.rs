@@ -26,15 +26,7 @@ mod test_helpers;
 use std::error::Error;
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
-
-#[allow(deprecated)]
-use assert_cmd::cargo::cargo_bin;
-use test_helpers::{output_includes, run_succeeds};
-
-#[allow(deprecated)]
-fn target_process_bin() -> std::path::PathBuf {
-    cargo_bin("target_process")
-}
+use test_helpers::{output_includes, run_succeeds, target_process_bin};
 
 #[test]
 fn nonexistent_pid_returns_success_with_zero_handles() -> Result<(), Box<dyn Error>> {
