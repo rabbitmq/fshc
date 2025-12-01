@@ -169,19 +169,15 @@ fn query_target_process_has_expected_minimum_descriptors() -> Result<(), Box<dyn
     // - 2 sockets explicitly
     // - Plus stdin, stdout, stderr (3 file descriptors)
     // So we expect at least 2 sockets and at least 1 file (temp file)
-    assert!(
-        sockets >= 2,
-        "Expected at least 2 sockets, got {}",
-        sockets
-    );
+    assert!(sockets >= 2, "Expected at least 2 sockets, got {}", sockets);
     // Files include stdin/stdout/stderr plus our temp file
     // On some platforms, the count might differ, so we just check > 0
-    assert!(files >= 1, "Expected at least 1 file descriptor, got {}", files);
     assert!(
-        total >= 3,
-        "Expected total descriptors >= 3, got {}",
-        total
+        files >= 1,
+        "Expected at least 1 file descriptor, got {}",
+        files
     );
+    assert!(total >= 3, "Expected total descriptors >= 3, got {}", total);
 
     // Clean up
     if let Some(mut stdin) = child.stdin.take() {
