@@ -1,6 +1,14 @@
 use super::*;
 
 use std::ffi::c_void;
+use windows_sys::Wdk::System::SystemServices::{
+    // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryobject
+    NtQueryObject as nt_query_object,
+    // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation
+    NtQuerySystemInformation as nt_query_system_information,
+    OBJECT_INFORMATION_CLASS,
+    SYSTEM_INFORMATION_CLASS,
+};
 use windows_sys::Win32::{
     Foundation::{
         FALSE,
@@ -11,24 +19,14 @@ use windows_sys::Win32::{
         STATUS_SUCCESS,
         UNICODE_STRING,
     },
-    System::{
-        Threading::{
-            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
-            GetCurrentProcessId as get_current_process_id,
-            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesshandlecount
-            GetProcessHandleCount as get_process_handle_count,
-            // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess
-            OpenProcess as open_process,
-            PROCESS_QUERY_LIMITED_INFORMATION,
-        },
-        WindowsProgramming::{
-            // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryobject
-            NtQueryObject as nt_query_object,
-            // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation
-            NtQuerySystemInformation as nt_query_system_information,
-            OBJECT_INFORMATION_CLASS,
-            SYSTEM_INFORMATION_CLASS,
-        },
+    System::Threading::{
+        // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
+        GetCurrentProcessId as get_current_process_id,
+        // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesshandlecount
+        GetProcessHandleCount as get_process_handle_count,
+        // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess
+        OpenProcess as open_process,
+        PROCESS_QUERY_LIMITED_INFORMATION,
     },
 };
 
