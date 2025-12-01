@@ -85,14 +85,18 @@ fn query_target_process_returns_json_with_descriptors() -> Result<(), Box<dyn Er
     reader.read_line(&mut pid_line)?;
     let target_pid = pid_line.trim();
 
-    let assert = run_succeeds(["--pid", target_pid])
+    let _ = run_succeeds(["--pid", target_pid])
         .stdout(output_includes(&format!("\"pid\":{}", target_pid)))
         .stdout(output_includes("\"total_descriptors\":"))
         .stdout(output_includes("\"file_descriptors\":"));
 
     // Windows doesn't report socket_descriptors separately
     #[cfg(not(target_os = "windows"))]
-    assert.stdout(output_includes("\"socket_descriptors\":"));
+    let _ = run_succeeds(["--pid", target_pid])
+        .stdout(output_includes(&format!("\"pid\":{}", target_pid)))
+        .stdout(output_includes("\"total_descriptors\":"))
+        .stdout(output_includes("\"file_descriptors\":"))
+        .stdout(output_includes("\"socket_descriptors\":"));
 
     if let Some(mut stdin) = child.stdin.take() {
         let _ = stdin.write_all(b"quit\n");
