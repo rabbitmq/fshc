@@ -13,13 +13,9 @@ use windows_sys::Wdk::System::SystemInformation::{
 };
 use windows_sys::Win32::{
     Foundation::{
-        FALSE,
         // https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
         GetLastError as get_last_error,
-        HANDLE,
-        STATUS_INFO_LENGTH_MISMATCH,
-        STATUS_SUCCESS,
-        UNICODE_STRING,
+        FALSE, HANDLE, STATUS_INFO_LENGTH_MISMATCH, STATUS_SUCCESS, UNICODE_STRING,
     },
     System::Threading::{
         // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocessid
@@ -90,7 +86,6 @@ impl FdList {
     pub fn list_by_type(pid: Pid) -> Result<ProcStats, FshcError> {
         let mut stats = ProcStats::new(pid);
 
-        // Get the list of all open kernel object handles.
         let mut buffer: Vec<usize> = Vec::with_capacity(SYSTEM_HANDLE_INFO_BUFFER_SIZE);
         loop {
             buffer.resize(buffer.len() + SYSTEM_HANDLE_INFO_BUFFER_SIZE, 0);
@@ -103,9 +98,6 @@ impl FdList {
                     &mut return_length,
                 )
             } {
-                // We can't query the size of the list so we query
-                // repeatedly, increasing the size of the input buffer
-                // linearly on each iteration.
                 STATUS_INFO_LENGTH_MISMATCH => continue,
                 STATUS_SUCCESS => break,
                 other => {
