@@ -151,7 +151,11 @@ fn query_target_process_has_expected_minimum_descriptors() -> Result<(), Box<dyn
     let total = json["total_descriptors"].as_u64().unwrap_or(0);
     let files = json["file_descriptors"].as_u64().unwrap_or(0);
 
-    assert!(files >= 1, "Expected at least 1 file descriptor, got {}", files);
+    assert!(
+        files >= 1,
+        "Expected at least 1 file descriptor, got {}",
+        files
+    );
     assert!(total >= 3, "Expected total descriptors >= 3, got {}", total);
 
     // Windows doesn't report socket_descriptors separately
