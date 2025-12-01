@@ -22,7 +22,7 @@ lto = true
 codegen-units = 1
 
 [target.'cfg(any(target_os = "linux"))'.dependencies]
-procfs = "0.17"
+procfs = "0.18"
 
 [target.'cfg(any(target_os = "macos"))'.dependencies]
 libproc = "0.14"
