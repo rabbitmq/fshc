@@ -28,7 +28,7 @@ procfs = "0.18"
 libproc = "0.14"
 
 [target.'cfg(target_os = "windows")'.dependencies.windows-sys]
-version = "0.59"
+version = "0.61"
 features = [
   "Wdk_Foundation",
   "Wdk_System_SystemInformation",
