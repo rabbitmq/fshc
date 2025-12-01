@@ -28,7 +28,7 @@ procfs = "0.18"
 libproc = "0.14"
 
 [target.'cfg(target_os = "windows")'.dependencies.windows-sys]
-version = "0.48"
+version = "0.59"
 features = [
   "Win32_System_WindowsProgramming",
   "Win32_System_Threading",
