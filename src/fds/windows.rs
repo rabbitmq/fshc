@@ -1,12 +1,14 @@
 use super::*;
 
 use std::ffi::c_void;
-use windows_sys::Wdk::System::SystemServices::{
+use windows_sys::Wdk::Foundation::{
     // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryobject
     NtQueryObject as nt_query_object,
+    OBJECT_INFORMATION_CLASS,
+};
+use windows_sys::Wdk::System::SystemInformation::{
     // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation
     NtQuerySystemInformation as nt_query_system_information,
-    OBJECT_INFORMATION_CLASS,
     SYSTEM_INFORMATION_CLASS,
 };
 use windows_sys::Win32::{

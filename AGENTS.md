@@ -10,24 +10,18 @@ It outputs JSON for machine consumption.
 
 ## Repository Structure
 
-```
-fshc/
-├── src/
-│   ├── main.rs           # Entry point, CLI parsing with clap
-│   ├── outcome.rs        # Error types and result handling
-│   ├── fds.rs            # Platform-agnostic FD enumeration (Linux, macOS)
-│   └── fds/
-│       └── windows.rs    # Windows-specific implementation
-├── scripts/              # Nu shell release scripts
-├── wix/                  # Windows installer configuration
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml        # Build and test workflow
-│   │   └── release.yml   # Release build workflow
-│   └── dependabot.yml    # Dependency updates
-└── .config/
-    └── nextest.toml      # Test runner configuration
-```
+ * `src/`:
+   - `main.rs`: entry point, CLI parsing with clap
+   - `outcome.rs`: error types and result handling
+   - `fds.rs`: platform-agnostic FD enumeration (Linux, macOS)
+   - `fds/windows.rs`: Windows-specific implementation
+ * `tests/`:
+   - `cli_tests.rs`: integration tests using `assert_cmd`
+   - `test_helpers.rs`: test helpers such as `run_succeeds`, `run_fails`
+   - `bin/target_process.rs`: helper binary to run integration tests against
+ * `scripts/`: Nu shell release scripts
+ * `.github/workflows/`: GitHub Actions workflows
+ * `.config/nextest.toml`: `cargo nextest` configuration
 
 ## Key Files
 
@@ -37,6 +31,8 @@ fshc/
 | `src/outcome.rs` | Custom error type `FshcError` with exit code mapping |
 | `src/fds.rs` | `FdList` struct with platform-specific implementations |
 | `src/fds/windows.rs` | Windows FFI using `windows-sys` crate |
+| `tests/cli_tests.rs` | Integration tests using `assert_cmd` |
+| `tests/bin/target_process.rs` | Spawns a process with 1 file + 2 sockets for testing |
 
 ## Build and Test Commands
 
