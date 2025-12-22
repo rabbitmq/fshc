@@ -19,6 +19,7 @@ serde_json = "1"
 [profile.release]
 opt-level = 3
 lto = true
+strip = true
 codegen-units = 1
 
 [target.'cfg(any(target_os = "linux"))'.dependencies]
