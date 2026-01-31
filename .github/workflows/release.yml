@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-    - 'v\d\.\d\.\d'
+    - 'v*.*.*'
 
 defaults:
   run:
@@ -14,8 +14,28 @@ permissions:
   contents: write
 
 jobs:
+  validate_version:
+    name: Validate Release Version
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Install Nu Shell
+      uses: hustcer/setup-nu@v3
+      with:
+        version: '0.100'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Validate NEXT_RELEASE_VERSION matches tag
+      run: nu ./scripts/validate-release-version.nu
+      env:
+        NEXT_RELEASE_VERSION: ${{ vars.NEXT_RELEASE_VERSION }}
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+
   release:
     name: Build and Archive
+    needs: [validate_version]
 
     runs-on: ${{ matrix.os }}
 
@@ -58,10 +78,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Free up disk space
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: .github/scripts/free_disk_space.sh
+
       - name: Install Rust toolchains
-        uses: dtolnay/rust-toolchain@beta
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: beta
           targets: ${{ matrix.target }}
 
       - name: Install Nu Shell
@@ -83,10 +106,10 @@ jobs:
       - name: Store macOS build artifact
         id: upload-macos-artifact
         if: ${{ matrix.os == 'macos-latest' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
-          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
+          name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-${{ matrix.target }}.tar.gz"
+          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELEASE_VERSION }}-${{ matrix.target }}.tar.gz"
           retention-days: 2
 
       - name: Build an fshc release archive on Linux
@@ -101,10 +124,10 @@ jobs:
       - name: Store Linux build artifact
         id: upload-linux-artifact
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
-          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.tar.gz"
+          name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-${{ matrix.target }}.tar.gz"
+          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELEASE_VERSION }}-${{ matrix.target }}.tar.gz"
           retention-days: 2
 
       - name: Build an fshc release archive on Windows
@@ -119,57 +142,73 @@ jobs:
       - name: Store Windows build artifact
         id: upload-windows-artifact
         if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.zip"
-          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELESE_VERSION }}-${{ matrix.target }}.zip"
+          name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-${{ matrix.target }}.zip"
+          path: "${{ github.workspace }}/target/${{ matrix.target }}/release/fshc-${{ vars.NEXT_RELEASE_VERSION }}-${{ matrix.target }}.zip"
           retention-days: 2
 
   create_gh_release:
     name: Create GitHub Release
     needs: [release]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-    - name: Fetch macOS archive
-      uses: actions/download-artifact@v7
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Install Nu Shell
+      uses: hustcer/setup-nu@v3
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-aarch64-apple-darwin.tar.gz"
+        version: '0.100'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract changelog for release
+      run: nu ./scripts/extract-changelog.nu
+      env:
+        VERSION: ${{ vars.NEXT_RELEASE_VERSION }}
+
+    - name: Fetch macOS archive
+      uses: actions/download-artifact@v4
+      with:
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-aarch64-apple-darwin.tar.gz"
         path: ./artifacts
     - name: Fetch Linux x86_64 glibc archive
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v4
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-x86_64-unknown-linux-gnu.tar.gz"
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-x86_64-unknown-linux-gnu.tar.gz"
         path: ./artifacts
     - name: Fetch Linux aarch64 glibc archive
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v4
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-aarch64-unknown-linux-gnu.tar.gz"
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-aarch64-unknown-linux-gnu.tar.gz"
         path: ./artifacts
     - name: Fetch Linux x86_64 static musl archive
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v4
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-x86_64-unknown-linux-musl.tar.gz"
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-x86_64-unknown-linux-musl.tar.gz"
         path: ./artifacts
     - name: Fetch Linux aarch64 static musl archive
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v4
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-aarch64-unknown-linux-musl.tar.gz"
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-aarch64-unknown-linux-musl.tar.gz"
         path: ./artifacts
     - name: Fetch Windows x86_64 archive
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v4
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-x86_64-pc-windows-msvc.zip"
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-x86_64-pc-windows-msvc.zip"
         path: ./artifacts
     - name: Fetch Windows aarch64 archive
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v4
       with:
-        name: "fshc-${{ vars.NEXT_RELESE_VERSION }}-aarch64-pc-windows-msvc.zip"
+        name: "fshc-${{ vars.NEXT_RELEASE_VERSION }}-aarch64-pc-windows-msvc.zip"
         path: ./artifacts
     - name: Publish fshc release archive
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v${{ vars.NEXT_RELESE_VERSION }}
+        tag_name: v${{ vars.NEXT_RELEASE_VERSION }}
         draft: false
+        body_path: release_notes.md
         files: ./artifacts/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

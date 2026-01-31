@@ -2,15 +2,15 @@ name: Build and test
 
 on:
   push:
-    branches: ["main"]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - '.github/workflows/ci.yml'
-  pull_request:
-    branches: ["main"]
+      - ".github/workflows/ci.yml"
+      - ".github/scripts/**"
+      - ".config/nextest.toml"
+      - "src/**"
+      - "tests/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  pull_request: {}
 
 env:
   CARGO_TERM_COLOR: always
@@ -18,19 +18,33 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    name: Lint
+    strategy:
+      matrix:
+        runner:
+          - ubuntu-22.04
+          - ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+
     steps:
       - uses: actions/checkout@v6
+
+      - name: Free up disk space
+        run: .github/scripts/free_disk_space.sh
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - name: Check lints
+
+      - name: Lint (clippy)
         run: cargo clippy --all-targets
-      - name: Check formatting
+
+      - name: Lint (rustfmt)
         run: cargo fmt --all --check
 
   build-and-test:
+    name: Build and test
     needs: lint
     strategy:
       fail-fast: false
@@ -49,28 +63,22 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Free up disk space
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: .github/scripts/free_disk_space.sh
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
 
-      - name: Cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ matrix.os }}-${{ matrix.rust }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install cargo-nextest
-        uses: taiki-e/install-action@nextest
+      - uses: taiki-e/install-action@nextest
 
       - name: Build
         run: cargo build --verbose
 
       - name: Run tests
-        run: cargo nextest run --all-features --no-tests=pass
+        run: cargo nextest run --cargo-profile ci --no-fail-fast --all-features --no-tests=pass
         env:
           NEXTEST_RETRIES: 2
           RUST_BACKTRACE: 1
