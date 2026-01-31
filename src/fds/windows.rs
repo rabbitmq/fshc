@@ -45,8 +45,8 @@ const SYSTEM_HANDLE_INFO_BUFFER_SIZE: usize = 262144; // 2^18
 const OBJECT_TYPE_INFORMATION: OBJECT_INFORMATION_CLASS = 0x2;
 const OBJECT_INFO_BUFFER_SIZE: usize = 4096; // 2^12
 
-/// `"File"` encoded as UTF16.
-/// `str` is UTF8-encoded but `UNICODE_STRING` is UTF16.
+/// `"File"` encoded as UTF-16.
+/// `str` is UTF-8-encoded but `UNICODE_STRING` is UTF-16.
 const FILE_HANDLE_NAME: &[u16; 4] = &[70, 105, 108, 101];
 
 /// Information about a kernel object handle.
