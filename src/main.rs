@@ -20,7 +20,7 @@ struct CliArgs {
     pid: u32,
 }
 
-fn main() {
+fn main() -> ExitCode {
     let args = CliArgs::parse();
     let res = run(&args);
 
@@ -38,11 +38,9 @@ fn run(args: &CliArgs) -> FshcResult {
     Ok(stats)
 }
 
-fn terminate(outcome: FshcResult, args: &CliArgs) {
+fn terminate(outcome: FshcResult, args: &CliArgs) -> ExitCode {
     match outcome {
-        Ok(stats) => {
-            exit(stats, ExitCode::Ok);
-        }
+        Ok(stats) => exit(stats, ExitCode::Ok),
         Err(err) => {
             let failure = Failure {
                 message: &format!(
@@ -51,30 +49,19 @@ fn terminate(outcome: FshcResult, args: &CliArgs) {
                 ),
                 details: &err.to_string(),
             };
-            exit(failure, err.exit_code());
+            exit(failure, err.exit_code())
         }
     }
 }
 
-fn exit<T: Serialize + fmt::Debug>(data: T, code: ExitCode) {
+fn exit<T: Serialize + fmt::Debug>(data: T, code: ExitCode) -> ExitCode {
+    let output = serde_json::to_string(&data)
+        .unwrap_or_else(|err| panic!("could not serialize {:?}: {}", data, err));
     match code {
-        ExitCode::Ok => {
-            println!(
-                "{}",
-                serde_json::to_string(&data)
-                    .unwrap_or_else(|err| panic!("could not serialize {:?}: {}", data, err))
-            );
-            std::process::exit(code as i32);
-        }
-        _ => {
-            eprintln!(
-                "{}",
-                serde_json::to_string(&data)
-                    .unwrap_or_else(|err| panic!("could not serialize {:?}: {}", data, err))
-            );
-            std::process::exit(code as i32);
-        }
+        ExitCode::Ok => println!("{}", output),
+        _ => eprintln!("{}", output),
     }
+    code
 }
 
 fn validate_pid(args: &CliArgs) -> Result<Pid, FshcError> {
