@@ -6,12 +6,14 @@
 
  * A new release workflow
  * CI improvements
+ * Disable stack unwinding on termination for faster exit
 
 ### Dependency Updates
 
  * `sysexits` upgraded to `0.11.0`
  * `thiserror` upgraded to `2.0.18`
  * `clap` upgraded to `4.5.54`
+ * `serde_json` upgraded to `1.0.149`
  * `windows-sys` upgraded to `0.61.x`
 
 
