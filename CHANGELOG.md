@@ -4,8 +4,8 @@
 
 ### Enhancements
 
- * Release workflow: version validation, automated changelog extraction
- * CI: lint on multiple Ubuntu versions, disk space cleanup
+ * A new release workflow
+ * CI improvements
 
 ### Dependency Updates
 
