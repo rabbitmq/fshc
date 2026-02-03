@@ -1,5 +1,10 @@
 # fshc Changelog
 
+## v1.5.0 (in development)
+
+No changes yet
+
+
 ## v1.4.0 (Feb 2, 2026)
 
 ### Enhancements
