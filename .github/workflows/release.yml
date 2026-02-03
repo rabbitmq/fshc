@@ -103,9 +103,38 @@ jobs:
             ${{ steps.build.outputs.artifact_path }}.sha256
           retention-days: 2
 
+  build-msi:
+    name: Build MSI
+    needs: [validate]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build MSI
+        uses: michaelklishin/rust-release-action@v1
+        id: build
+        with:
+          command: release-windows-msi
+          target: x86_64-pc-windows-msvc
+          locked: 'true'
+          checksum: 'sha256'
+
+      - name: Upload MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-x86_64-pc-windows-msvc
+          path: |
+            ${{ steps.build.outputs.artifact_path }}
+            ${{ steps.build.outputs.artifact_path }}.sha256
+          retention-days: 2
+
   release:
     name: Create Release
-    needs: [validate, build]
+    needs: [validate, build, build-msi]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout

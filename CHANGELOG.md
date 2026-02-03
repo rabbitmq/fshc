@@ -1,8 +1,10 @@
 # fshc Changelog
 
-## v1.5.0 (in development)
+## v1.5.0 (Feb 2, 2026)
 
-No changes yet
+### Enhancements
+
+ * Produce an MSI installer as part of the release
 
 
 ## v1.4.0 (Feb 2, 2026)
