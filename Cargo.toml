@@ -2,7 +2,7 @@
 name = "fshc"
 version = "1.5.0"
 edition = "2024"
-description = "A tiny file and socket handle counter, a modern open source alternative to handle.exe"
+description = "File and socket handle counter, a modern alternative to handle.exe"
 
 repository = "https://github.com/rabbitmq/fshc"
 
