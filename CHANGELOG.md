@@ -1,12 +1,12 @@
 # fshc Changelog
 
-## v1.4.0 (in development)
+## v1.4.0 (Feb 2, 2026)
 
 ### Enhancements
 
- * A new release workflow
- * CI improvements
+ * Use mimalloc allocator for faster musl builds
  * Disable stack unwinding on termination for faster exit
+ * A major release workflow revision using [`michaelklishin/rust-release-action`](https://github.com/michaelklishin/rust-release-action)
 
 ### Dependency Updates
 

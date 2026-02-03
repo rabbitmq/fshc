@@ -2,12 +2,17 @@
 name = "fshc"
 version = "1.4.0"
 edition = "2024"
+description = "A tiny file and socket handle counter, a modern open source alternative to handle.exe"
 
 repository = "https://github.com/rabbitmq/fshc"
 
 authors = ["Michael Klishin", "Michael Davis", "RabbitMQ Core Team"]
 
 license = "Apache-2.0"
+
+[features]
+default = []
+mimalloc = ["dep:mimalloc"]
 
 [dependencies]
 clap = { version = "4.5", features = ["derive", "help", "color", "cargo"] }
@@ -32,6 +37,9 @@ procfs = "0.18"
 
 [target.'cfg(any(target_os = "macos"))'.dependencies]
 libproc = "0.14"
+
+[target.'cfg(target_env = "musl")'.dependencies]
+mimalloc = { version = "0.1", optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows-sys]
 version = "0.61"

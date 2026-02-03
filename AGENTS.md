@@ -19,7 +19,6 @@ It outputs JSON for machine consumption.
    - `cli_tests.rs`: integration tests using `assert_cmd`
    - `test_helpers.rs`: test helpers such as `run_succeeds`, `run_fails`
    - `bin/target_process.rs`: helper binary to run integration tests against
- * `scripts/`: Nu shell release scripts
  * `.github/workflows/`: GitHub Actions workflows
  * `.config/nextest.toml`: `cargo nextest` configuration
 

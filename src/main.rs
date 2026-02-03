@@ -1,3 +1,7 @@
+#[cfg(all(target_env = "musl", feature = "mimalloc"))]
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 mod fds;
 mod outcome;
 
