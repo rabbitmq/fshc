@@ -17,7 +17,7 @@ mimalloc = ["dep:mimalloc"]
 [dependencies]
 clap = { version = "4.5", features = ["derive", "help", "color", "cargo"] }
 thiserror = "2.0"
-sysexits = "0.11"
+sysexits = "0.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
