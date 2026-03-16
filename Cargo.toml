@@ -15,7 +15,7 @@ default = []
 mimalloc = ["dep:mimalloc"]
 
 [dependencies]
-clap = { version = "4.5", features = ["derive", "help", "color", "cargo"] }
+clap = { version = "4.6", features = ["derive", "help", "color", "cargo"] }
 thiserror = "2.0"
 sysexits = "0.13"
 serde = { version = "1.0", features = ["derive"] }
