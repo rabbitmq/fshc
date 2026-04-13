@@ -235,7 +235,7 @@ jobs:
         run: cp ${{ steps.collect.outputs.checksums_file }} release/ || true
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.validate.outputs.version }}
           draft: false
