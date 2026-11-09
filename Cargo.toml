@@ -36,7 +36,7 @@ debug = 0
 procfs = "0.18"
 
 [target.'cfg(any(target_os = "macos"))'.dependencies]
-libproc = "0.14"
+libproc = "0.15"
 
 [target.'cfg(target_env = "musl")'.dependencies]
 mimalloc = { version = "0.1", optional = true }
